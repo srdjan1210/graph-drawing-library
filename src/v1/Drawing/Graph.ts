@@ -1,4 +1,5 @@
-import { Point } from "../Interfaces/Point"
+import { findMinValue, findMaxValue } from "../Utils/minMax.js"
+import { calculateXAxisPosition } from "../Utils/axisCalculation.js"
 
 abstract class Graph {
     protected ctx: CanvasRenderingContext2D
@@ -13,6 +14,7 @@ abstract class Graph {
     protected readonly ylength: number
     protected readonly xbegin: number
     protected readonly ybegin: number
+    protected xAxisCoor: number
     protected dataset: number[]
 
 
@@ -58,7 +60,10 @@ abstract class Graph {
 
     protected drawYAxis() {
         this.ctx.fillStyle = "#000000"
-        this.ctx.fillRect(0, 0, 1, this.ylength)
+        this.ctx.save()
+        this.ctx.fillRect(0, 0, 1, this.xAxisCoor)
+        this.ctx.fillRect(0, 0, 1, -(this.ylength - this.xAxisCoor))
+        this.ctx.restore()
     }
 
     protected moveToCoordinateCenter() {
@@ -66,23 +71,29 @@ abstract class Graph {
     }
 
     protected reverseScaleYAxis() {
-        this.ctx.setTransform(1, 0, 0, 1, 1 / 10 * this.width, 9 / 10 * this.height)
+        let minValue: number = findMinValue(this.dataset)
+        let maxValue: number = findMaxValue(this.dataset)
+
+        let xAxisPosition: number = calculateXAxisPosition(minValue, maxValue, this.height)
+        this.xAxisCoor = xAxisPosition
+        this.ctx.setTransform(1, 0, 0, 1, 1 / 10 * this.width, xAxisPosition)
         this.ctx.scale(1, -1)
     }
 
-    protected findMaxValue(): number {
-        let max: number = this.dataset[0]
-        for (let point of this.dataset) {
-            if (point > max) {
-                max = point
-            }
-        }
-
-        return max
+    protected scaleYvalue() {
+        let minValue: number = findMinValue(this.dataset)
+        let maxValue: number = findMaxValue(this.dataset)
+        this.determineValueCase(minValue, maxValue)
     }
 
-    protected scaleYvalue() {
-        this.ctx.scale(1, (this.ylength / this.findMaxValue()))
+    private determineValueCase(minValue: number, maxValue: number) {
+        if (minValue >= 0 && maxValue > 0) {
+            this.ctx.scale(1, this.ylength / maxValue)
+        } else if (minValue < 0 && maxValue <= 0) {
+            this.ctx.scale(1, this.ylength / Math.abs(minValue))
+        } else if (minValue < 0 && maxValue > 0) {
+            this.ctx.scale(1, this.ylength / (maxValue + Math.abs(minValue)))
+        }
     }
 
     setDataset(dataset: number[]) {
@@ -93,7 +104,7 @@ abstract class Graph {
         this.shouldAnimate = value
     }
 
-    protected abstract draw();
+    protected abstract draw()
 
 }
 
