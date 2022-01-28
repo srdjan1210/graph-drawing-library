@@ -1,3 +1,4 @@
 dist
 front-test
 node_modules
+src/v1/main_test.ts
