@@ -1,0 +1,23 @@
+import { BarGraph } from "./Drawing/BarGraph.js"
+import { Point } from "./Interfaces/Point"
+let canvas = <HTMLCanvasElement>document.getElementById('panel')
+let ctx = canvas.getContext('2d')
+
+let graph = new BarGraph(ctx, canvas.width, canvas.height)
+// let dataset: Point[] = [{ x: 1, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 8, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 100 }]
+//let dataset: Point[] = [{ x: 1, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }]
+let dataset: number[] = [10, 20, 30, 10]
+graph.setDataset(dataset)
+graph.repaint()
+
+setTimeout(() => {
+    let dataset2: number[] = [5, 6, 10, 5, -1]
+    console.log("Called next graph")
+    graph.setDataset(dataset2)
+    graph.setAnimation(false)
+    graph.repaint()
+}, 6000)
+export { ctx }
+
+
+
