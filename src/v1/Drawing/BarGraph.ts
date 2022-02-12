@@ -9,14 +9,14 @@ class BarGraph extends Graph {
     }
 
     protected draw() {
-        console.log(this.dataset.length)
         if (this.dataset.length == 0) return
-        console.log("Started drawing")
         let step: number = this.xlength / this.dataset.length
         let offset = 10
         let barWidth: number = step - offset
         this.ctx.fillStyle = this.color
         this.scaleYvalue()
+        this.drawValueMarksOnYAxis()
+        this.writeLabelsForDataValues()
         if (this.shouldAnimate) this.drawAnimatedAllPoints(step, offset, barWidth, this.loaded)
         else this.drawPointsWithoutAnimation(step, offset, barWidth)
     }
@@ -37,6 +37,31 @@ class BarGraph extends Graph {
 
     private drawSingleBar(x: number, y: number, width: number, height: number) {
         this.ctx.fillRect(x, y, width, height)
+    }
+
+    private drawValueMarksOnYAxis() {
+        let x: number = 0
+        this.ctx.save()
+        this.ctx.lineWidth = 1 / this.yScaleFactor
+        for (let val of this.dataset) {
+            this.ctx.moveTo(x - 5, val)
+            this.ctx.lineTo(x + 5, val)
+            this.ctx.stroke()
+        }
+        this.ctx.restore()
+    }
+
+    private writeLabelsForDataValues() {
+        if (this.labels == null || this.labels.length <= 0) return
+        this.ctx.save()
+        this.ctx.font = "0.1px"
+
+        let i: number = 0
+        for (let val of this.dataset) {
+            this.ctx.strokeText(this.labels[i], 0, this.dataset[i])
+            i++
+        }
+        this.ctx.restore()
     }
 
 }

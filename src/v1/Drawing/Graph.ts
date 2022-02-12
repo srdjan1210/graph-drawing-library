@@ -15,8 +15,9 @@ abstract class Graph {
     protected readonly xbegin: number
     protected readonly ybegin: number
     protected xAxisCoor: number
-    protected dataset: number[]
-
+    protected dataset: number[] = null
+    protected labels: string[] = null
+    protected yScaleFactor: number = 1
 
     constructor(canvasContext: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) {
         this.ctx = canvasContext
@@ -88,17 +89,19 @@ abstract class Graph {
     }
 
     private determineValueCase(minValue: number, maxValue: number) {
-        if (minValue >= 0 && maxValue > 0) {
-            this.ctx.scale(1, this.ylength / maxValue)
-        } else if (minValue < 0 && maxValue <= 0) {
-            this.ctx.scale(1, this.ylength / Math.abs(minValue))
-        } else if (minValue < 0 && maxValue > 0) {
-            this.ctx.scale(1, this.ylength / (maxValue + Math.abs(minValue)))
-        }
+        if ((minValue >= 0 && maxValue > 0) || (minValue < 0 && maxValue <= 0))
+            this.yScaleFactor = this.ylength / Math.abs(maxValue)
+        else if (minValue < 0 && maxValue > 0)
+            this.yScaleFactor = this.ylength / (maxValue + Math.abs(minValue))
+        this.ctx.scale(1, this.yScaleFactor)
     }
 
     setDataset(dataset: number[]) {
         this.dataset = dataset
+    }
+
+    setLabels(labels: string[]) {
+        this.labels = labels
     }
 
     setAnimation(value: boolean) {
