@@ -40,6 +40,7 @@ abstract class Graph {
     protected restartCanvas() {
         this.ctx.save()
         this.ctx.fillStyle = "white"
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0)
         this.ctx.fillRect(0, 0, this.width, this.height)
         this.ctx.restore()
 

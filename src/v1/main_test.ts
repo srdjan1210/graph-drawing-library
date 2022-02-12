@@ -11,13 +11,6 @@ let dataset: number[] = [5, 6, 10, 5, -1]
 graph.setDataset(dataset)
 graph.repaint()
 
-setTimeout(() => {
-    let dataset2: number[] = [5, 6, 10, 5]
-    console.log("Called next graph")
-    graph.setDataset(dataset2)
-    graph.setAnimation(false)
-    graph.repaint()
-}, 6000)
 export { ctx }
 
 
