@@ -2,33 +2,55 @@ import { findMinValue, findMaxValue } from "../Utils/minMax.js"
 import { calculateXAxisPosition } from "../Utils/axisCalculation.js"
 
 abstract class Graph {
+    protected canvas: HTMLCanvasElement
     protected ctx: CanvasRenderingContext2D
     protected width: number
     protected height: number
     protected shouldAnimate: boolean = true
-    protected readonly leftOffset: number = 10
-    protected readonly bottomOffset: number = 10
-    protected readonly topOffset: number = 10
-    protected readonly rightoffset: number = 10
-    protected readonly xlength: number
-    protected readonly ylength: number
-    protected readonly xbegin: number
-    protected readonly ybegin: number
+    protected leftOffset: number = 10
+    protected bottomOffset: number = 10
+    protected topOffset: number = 30
+    protected rightoffset: number = 10
+    protected xlength: number
+    protected ylength: number
+    protected xbegin: number
+    protected ybegin: number
     protected xAxisCoor: number
     protected dataset: number[]
 
 
-    constructor(canvasContext: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) {
-        this.ctx = canvasContext
+    // constructor(canvasContext: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) {
+    constructor(canvas: HTMLCanvasElement) {
+        this.canvas = canvas
+        this.ctx = canvas.getContext("2d")
+        this.initializeVariables()
+        // this.ctx = canvasContext
+        // this.width = canvasWidth
+        // this.height = canvasHeight
+        // this.leftOffset = 1 / 10 * canvasWidth
+        // this.rightoffset = this.leftOffset
+        // this.topOffset = 1 / 10 * canvasHeight
+        // this.bottomOffset = 1 / 10 * canvasHeight
+        // this.xlength = 8 / 10 * this.width
+        // this.ylength = this.height - this.bottomOffset - this.topOffset
+        // this.xbegin = this.leftOffset
+        // this.ybegin = this.height - this.bottomOffset
+        this.prepareCanvas()
+    }
+
+    protected initializeVariables() {
+        let canvasWidth = this.canvas.width
+        let canvasHeight = this.canvas.height
         this.width = canvasWidth
         this.height = canvasHeight
         this.leftOffset = 1 / 10 * canvasWidth
         this.rightoffset = this.leftOffset
+        this.topOffset = 1 / 10 * canvasHeight
+        this.bottomOffset = 1 / 10 * canvasHeight
         this.xlength = 8 / 10 * this.width
         this.ylength = this.height - this.bottomOffset - this.topOffset
         this.xbegin = this.leftOffset
         this.ybegin = this.height - this.bottomOffset
-        this.prepareCanvas()
     }
 
     protected prepareCanvas() {
@@ -60,9 +82,9 @@ abstract class Graph {
     }
 
     protected drawYAxis() {
-        this.ctx.fillStyle = "#000000"
         this.ctx.save()
-        this.ctx.fillRect(0, 0, 1, this.xAxisCoor)
+        this.ctx.fillStyle = "#000000"
+        this.ctx.fillRect(0, 0, 1, this.xAxisCoor - this.topOffset)
         this.ctx.fillRect(0, 0, 1, -(this.ylength - this.xAxisCoor))
         this.ctx.restore()
     }
@@ -84,16 +106,23 @@ abstract class Graph {
     protected scaleYvalue() {
         let minValue: number = findMinValue(this.dataset)
         let maxValue: number = findMaxValue(this.dataset)
-        this.determineValueCase(minValue, maxValue)
+        let newDataset = this.dataset
+
+        let scaleCoeficient = this.determineValueCase(minValue, maxValue)
+        newDataset = this.dataset.map(el => el * scaleCoeficient)
+        return newDataset
     }
 
     private determineValueCase(minValue: number, maxValue: number) {
         if (minValue >= 0 && maxValue > 0) {
-            this.ctx.scale(1, this.ylength / maxValue)
+            // this.ctx.scale(1, this.ylength / maxValue)
+            return this.ylength / maxValue
         } else if (minValue < 0 && maxValue <= 0) {
-            this.ctx.scale(1, this.ylength / Math.abs(minValue))
+            //this.ctx.scale(1, this.ylength / Math.abs(minValue))
+            return this.ylength / Math.abs(minValue)
         } else if (minValue < 0 && maxValue > 0) {
-            this.ctx.scale(1, this.ylength / (maxValue + Math.abs(minValue)))
+            //this.ctx.scale(1, this.ylength / (maxValue + Math.abs(minValue)))
+            return this.ylength / (maxValue + Math.abs(minValue))
         }
     }
 
