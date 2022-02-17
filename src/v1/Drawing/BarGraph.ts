@@ -12,7 +12,6 @@ class BarGraph extends Graph {
     }
 
     protected draw() {
-        console.log(this.dataset.length)
         if (this.dataset.length == 0) return
         let step: number = this.xlength / this.dataset.length
         let offset = 10
