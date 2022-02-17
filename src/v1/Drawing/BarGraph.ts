@@ -1,12 +1,9 @@
 import { Graph } from "./Graph.js"
 
 class BarGraph extends Graph {
-    protected color: string = "blue"
+    //protected color: string = "blue"
     protected loaded: number = 0.1
 
-    // constructor(canvasContext: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) {
-    //     super(canvasContext, canvasWidth, canvasHeight)
-    // }
     constructor(canvas: HTMLCanvasElement) {
         super(canvas)
     }
@@ -16,7 +13,7 @@ class BarGraph extends Graph {
         let step: number = this.xlength / this.dataset.length
         let offset = 10
         let barWidth: number = step - offset
-        this.ctx.fillStyle = this.color
+        this.ctx.fillStyle = this.dataColor
         let scaledValues = this.scaleYvalue()
         if (this.shouldAnimate) this.drawAnimatedAllPoints(scaledValues, step, offset, barWidth, this.loaded)
         else this.drawPointsWithoutAnimation(scaledValues, step, offset, barWidth)

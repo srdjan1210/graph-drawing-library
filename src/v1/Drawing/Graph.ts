@@ -1,5 +1,5 @@
 import { findMinValue, findMaxValue } from "../Utils/minMax.js"
-import { calculateXAxisPosition } from "../Utils/axisCalculation.js"
+import { calculateXAxisPosition, calculateXAxisPosition2 } from "../Utils/axisCalculation.js"
 
 abstract class Graph {
     protected canvas: HTMLCanvasElement
@@ -20,10 +20,10 @@ abstract class Graph {
     protected title: string = ""
     protected titleVisibility: boolean = true
     protected resizedNumber: number = 0
+    protected dataColor: string = "blue"
     protected readonly OFFSET_CONSTANT: number = 0.1
 
 
-    // constructor(canvasContext: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number) {
     constructor(canvas: HTMLCanvasElement) {
         this.canvas = canvas
         this.ctx = canvas.getContext("2d")
@@ -77,7 +77,7 @@ abstract class Graph {
         this.reverseScaleYAxis()
         this.drawXAxis()
         this.drawYAxis()
-        this.drawHorizontalLines()
+        //this.drawHorizontalLines()
         this.writeTitle()
         this.draw()
     }
@@ -113,7 +113,8 @@ abstract class Graph {
         let minValue: number = findMinValue(this.dataset)
         let maxValue: number = findMaxValue(this.dataset)
 
-        let xAxisPosition: number = calculateXAxisPosition(minValue, maxValue, this.height)
+        //let xAxisPosition: number = calculateXAxisPosition(minValue, maxValue, this.height, this.topOffset)
+        let xAxisPosition: number = calculateXAxisPosition2(minValue, maxValue, this.ylength, this.topOffset)
         this.xAxisCoor = xAxisPosition
         this.ctx.setTransform(1, 0, 0, 1, this.OFFSET_CONSTANT * this.width, xAxisPosition)
         this.ctx.scale(1, -1)
@@ -121,7 +122,6 @@ abstract class Graph {
 
     protected scaleYvalue() {
         let newDataset = this.dataset
-
         let scaleCoeficient = this.determineValueCase()
         newDataset = this.dataset.map(el => el * scaleCoeficient)
         return newDataset
@@ -159,9 +159,10 @@ abstract class Graph {
 
         let titlePosition = this.width / 2 - 10
         this.ctx.save()
-        let fontSize = 0.4 * this.topOffset
+        //let fontSize = 0.4 * this.topOffset
         this.ctx.fillStyle = "#6e6e6e"
-        this.ctx.font = `bold ${fontSize * window.devicePixelRatio}px Arial`
+        // this.ctx.font = `bold ${fontSize * window.devicePixelRatio}px Arial`
+        this.ctx.font = `bold 15px Arial`
         this.ctx.setTransform(1, 0, 0, 1, 0, 0)
         this.ctx.scale(1, 1)
         this.ctx.fillText(this.title, titlePosition + 0.5, this.topOffset / 2 + 0.5)
@@ -182,6 +183,10 @@ abstract class Graph {
 
     setTitleVisible(visibility: boolean) {
         this.titleVisibility = visibility
+    }
+
+    setDataColor(color: string) {
+        this.dataColor = color
     }
 
     protected abstract draw()
