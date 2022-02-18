@@ -7,7 +7,7 @@ abstract class Graph {
     protected ctx: CanvasRenderingContext2D
     protected width: number
     protected height: number
-    protected shouldAnimate: boolean = true
+    protected shouldAnimate: boolean = false
     protected leftOffset: number = 10
     protected bottomOffset: number = 10
     protected topOffset: number = 30
@@ -23,6 +23,7 @@ abstract class Graph {
     protected resizedNumber: number = 0
     protected dataColor: string = "blue"
     protected horizontalLinesEnabled: boolean = true
+    protected resizeObserver: ResizeObserver = null
     protected readonly HORIZONTAL_LINES_COUNT: number = 11
     protected readonly OFFSET_CONSTANT: number = 0.05
 
@@ -52,12 +53,13 @@ abstract class Graph {
 
     protected initializeResizeObserver() {
         let context = this
-        new ResizeObserver(function () {
+        this.resizeObserver = new ResizeObserver(function () {
             if (context.resizedNumber != 0) fix_dpi(context.canvas)
             context.initializeVariables()
             context.resizedNumber++
             context.repaint()
-        }).observe(this.canvas)
+        })
+        this.resizeObserver.observe(this.canvas)
     }
 
     protected prepareCanvas() {
@@ -87,19 +89,19 @@ abstract class Graph {
 
     protected drawXAxis() {
         this.ctx.fillStyle = "#000000"
-        this.ctx.fillRect(0, 0, this.xlength, 1)
+        this.ctx.fillRect(0, 0, this.xlength, 2)
     }
 
     protected drawYAxis() {
         this.ctx.save()
         this.ctx.fillStyle = "#000000"
-        this.ctx.fillRect(0, 0, 1, this.xAxisCoor - this.topOffset)
-        this.ctx.fillRect(0, 0, 1, -(Math.abs(this.ylength - (this.xAxisCoor - this.topOffset))))
+        this.ctx.fillRect(0, 0, 2, this.xAxisCoor - this.topOffset)
+        this.ctx.fillRect(0, 0, 2, -(Math.abs(this.ylength - (this.xAxisCoor - this.topOffset))))
         this.ctx.restore()
     }
 
     protected moveToCoordinateCenter() {
-        this.ctx.translate(1 / 10 * this.width, 9 / 10 * this.height)
+        this.ctx.translate(this.leftOffset, this.topOffset + this.ylength)
     }
 
     protected drawHorizontalLines() {
@@ -193,6 +195,10 @@ abstract class Graph {
 
     enableHorizontalLines(enabled: boolean) {
         this.horizontalLinesEnabled = enabled
+    }
+
+    stopResizeObserver() {
+        this.resizeObserver.disconnect()
     }
 
     protected abstract draw()
