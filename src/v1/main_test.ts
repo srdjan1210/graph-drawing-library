@@ -10,13 +10,13 @@ let graph = new BarGraph(canvas)
 // let dataset: Point[] = [{ x: 1, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 8, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 100 }]
 //let dataset: Point[] = [{ x: 1, y: 10 }, { x: 2, y: 20 }, { x: 3, y: 30 }, { x: 4, y: 10 }]
 // let dataset: number[] = [10, 20, -30, 10]
-let dataset: number[] = [-5, -6, -10, -5]
+let dataset: number[] = [5, 6, 10, 5, -20]
 graph.setDataset(dataset)
 graph.setDataColor("red")
 graph.setTitle("Tesla")
 graph.repaint()
 
-
+console.log(Math.ceil(261352.242))
 // setTimeout(function () {
 
 //     graph.setDataset([2, 3, 1, 2, 3])

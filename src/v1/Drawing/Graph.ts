@@ -1,5 +1,6 @@
 import { findMinValue, findMaxValue } from "../Utils/minMax.js"
-import { calculateXAxisPosition, calculateXAxisPosition2 } from "../Utils/axisCalculation.js"
+import { calculateXAxisPosition } from "../Utils/axisCalculation.js"
+import { fix_dpi } from "../Utils/dpiCorrection.js"
 
 abstract class Graph {
     protected canvas: HTMLCanvasElement
@@ -21,7 +22,9 @@ abstract class Graph {
     protected titleVisibility: boolean = true
     protected resizedNumber: number = 0
     protected dataColor: string = "blue"
-    protected readonly OFFSET_CONSTANT: number = 0.1
+    protected horizontalLinesEnabled: boolean = true
+    protected readonly HORIZONTAL_LINES_COUNT: number = 11
+    protected readonly OFFSET_CONSTANT: number = 0.05
 
 
     constructor(canvas: HTMLCanvasElement) {
@@ -41,7 +44,7 @@ abstract class Graph {
         this.rightoffset = this.leftOffset
         this.topOffset = this.OFFSET_CONSTANT * canvasHeight
         this.bottomOffset = this.OFFSET_CONSTANT * canvasHeight
-        this.xlength = 4 / 5 * this.width
+        this.xlength = (1 - 2 * this.OFFSET_CONSTANT) * this.width
         this.ylength = this.height - this.bottomOffset - this.topOffset
         this.xbegin = this.leftOffset
         this.ybegin = this.height - this.bottomOffset
@@ -50,7 +53,7 @@ abstract class Graph {
     protected initializeResizeObserver() {
         let context = this
         new ResizeObserver(function () {
-            if (context.resizedNumber != 0) context.fix_dpi()
+            if (context.resizedNumber != 0) fix_dpi(context.canvas)
             context.initializeVariables()
             context.resizedNumber++
             context.repaint()
@@ -77,7 +80,7 @@ abstract class Graph {
         this.reverseScaleYAxis()
         this.drawXAxis()
         this.drawYAxis()
-        //this.drawHorizontalLines()
+        this.drawHorizontalLines()
         this.writeTitle()
         this.draw()
     }
@@ -100,12 +103,31 @@ abstract class Graph {
     }
 
     protected drawHorizontalLines() {
-        let graphTopLength = this.xAxisCoor - this.topOffset
-        let step = graphTopLength / 10
+        if (!this.horizontalLinesEnabled) return
+
+        let xAxisPositionCoef: number = (this.xAxisCoor - this.topOffset) / this.ylength
+        let linesAboveZero: number = Math.floor(xAxisPositionCoef * this.HORIZONTAL_LINES_COUNT)
+        let linesBelowZero: number = this.HORIZONTAL_LINES_COUNT - linesAboveZero
+
+        this.drawHorizontalLinesAboveZero(linesAboveZero, this.xAxisCoor - this.topOffset)
+        this.drawHorizontalLinesBelowZero(linesBelowZero, this.ylength + this.topOffset - this.xAxisCoor)
+    }
+
+    private drawHorizontalLinesAboveZero(count: number, yLenAboveZero: number) {
+        let step = yLenAboveZero / count
         this.ctx.save()
-        this.ctx.fillStyle = "#6e6e6e"
-        for (let i = step; i < graphTopLength; i += step)
-            this.ctx.fillRect(0, i, this.xlength, 2)
+        this.ctx.fillStyle = "darkgray"
+        for (let y = step; y <= yLenAboveZero; y += step)
+            this.ctx.fillRect(0, y, this.xlength, 1)
+        this.ctx.restore()
+    }
+
+    private drawHorizontalLinesBelowZero(count: number, yLenBelowZero: number) {
+        let step = yLenBelowZero / count
+        this.ctx.save()
+        this.ctx.fillStyle = "darkgray"
+        for (let y = step; y <= yLenBelowZero; y += step)
+            this.ctx.fillRect(0, -y, this.xlength, 1)
         this.ctx.restore()
     }
 
@@ -113,45 +135,25 @@ abstract class Graph {
         let minValue: number = findMinValue(this.dataset)
         let maxValue: number = findMaxValue(this.dataset)
 
-        //let xAxisPosition: number = calculateXAxisPosition(minValue, maxValue, this.height, this.topOffset)
-        let xAxisPosition: number = calculateXAxisPosition2(minValue, maxValue, this.ylength, this.topOffset)
+        let xAxisPosition: number = calculateXAxisPosition(minValue, maxValue, this.ylength, this.topOffset)
         this.xAxisCoor = xAxisPosition
         this.ctx.setTransform(1, 0, 0, 1, this.OFFSET_CONSTANT * this.width, xAxisPosition)
         this.ctx.scale(1, -1)
     }
 
     protected scaleYvalue() {
-        let newDataset = this.dataset
         let scaleCoeficient = this.determineValueCase()
-        newDataset = this.dataset.map(el => el * scaleCoeficient)
-        return newDataset
+        return this.dataset.map(el => el * scaleCoeficient)
     }
-    protected fix_dpi() {
-        let dpi = window.devicePixelRatio;
-        let canvasElement = document.getElementById(this.canvas.id)
-        let style: any = {
-            height(): number {
-                return +window.getComputedStyle(canvasElement).getPropertyValue('height').slice(0, -2);
-            },
-            width(): number {
-                return +window.getComputedStyle(canvasElement).getPropertyValue('width').slice(0, -2);
-            }
-        }
-        this.canvas.setAttribute('height', style.height() * dpi + "px");
-        this.canvas.setAttribute('width', style.width() * dpi + "px");
-    }
+
 
     private determineValueCase() {
         let minValue: number = findMinValue(this.dataset)
         let maxValue: number = findMaxValue(this.dataset)
 
-        if (minValue >= 0 && maxValue > 0) {
-            return this.ylength / maxValue
-        } else if (minValue < 0 && maxValue <= 0) {
-            return this.ylength / Math.abs(minValue)
-        } else if (minValue < 0 && maxValue > 0) {
-            return this.ylength / (maxValue + Math.abs(minValue))
-        }
+        if (minValue >= 0 && maxValue > 0) return this.ylength / maxValue
+        if (minValue < 0 && maxValue <= 0) return this.ylength / Math.abs(minValue)
+        if (minValue < 0 && maxValue > 0) return this.ylength / (maxValue + Math.abs(minValue))
     }
 
     protected writeTitle() {
@@ -187,6 +189,10 @@ abstract class Graph {
 
     setDataColor(color: string) {
         this.dataColor = color
+    }
+
+    enableHorizontalLines(enabled: boolean) {
+        this.horizontalLinesEnabled = enabled
     }
 
     protected abstract draw()
