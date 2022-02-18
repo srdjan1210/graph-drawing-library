@@ -1,7 +1,6 @@
 import { Graph } from "./Graph.js"
 
 class BarGraph extends Graph {
-    //protected color: string = "blue"
     protected loaded: number = 0.1
 
     constructor(canvas: HTMLCanvasElement) {
