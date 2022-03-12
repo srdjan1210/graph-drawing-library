@@ -1,0 +1,29 @@
+{
+  "name": "graph-drawing-library",
+  "version": "1.0.0",
+  "description": "Graph drawing library made with plain typescript and canvas element",
+  "main": "index.js",
+  "dependencies": {
+    "tspath": "^1.3.7",
+    "typescript": "^4.6.2",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.2.8"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srdjan1210/graph-drawing-library.git"
+  },
+  "author": "Srdjan Stjepanovic",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/srdjan1210/graph-drawing-library/issues"
+  },
+  "homepage": "https://github.com/srdjan1210/graph-drawing-library#readme"
+}

@@ -1,6 +1,6 @@
-import { findMinValue, findMaxValue } from "../Utils/minMax.js"
-import { calculateXAxisPosition } from "../Utils/axisCalculation.js"
-import { fix_dpi } from "../Utils/dpiCorrection.js"
+import { findMinValue, findMaxValue } from "../Utils/minMax"
+import { calculateXAxisPosition } from "../Utils/axisCalculation"
+import { fix_dpi } from "../Utils/dpiCorrection"
 
 abstract class Graph {
     protected canvas: HTMLCanvasElement
@@ -23,8 +23,11 @@ abstract class Graph {
     protected resizedNumber: number = 0
     protected dataColor: string = "blue"
     protected horizontalLinesEnabled: boolean = true
+    protected verticalLinesEnabled: boolean = true
+    protected labels: string[] = []
     protected readonly HORIZONTAL_LINES_COUNT: number = 11
-    protected readonly OFFSET_CONSTANT: number = 0.05
+    protected readonly OFFSET_CONSTANT: number = 0.15
+
 
 
     constructor(canvas: HTMLCanvasElement) {
@@ -40,14 +43,15 @@ abstract class Graph {
         let canvasHeight = this.canvas.height
         this.width = canvasWidth
         this.height = canvasHeight
-        this.leftOffset = this.OFFSET_CONSTANT * canvasWidth
+        this.leftOffset = this.OFFSET_CONSTANT * canvasHeight
         this.rightoffset = this.leftOffset
         this.topOffset = this.OFFSET_CONSTANT * canvasHeight
         this.bottomOffset = this.OFFSET_CONSTANT * canvasHeight
-        this.xlength = (1 - 2 * this.OFFSET_CONSTANT) * this.width
+        this.xlength = this.width - this.leftOffset - this.rightoffset
         this.ylength = this.height - this.bottomOffset - this.topOffset
         this.xbegin = this.leftOffset
         this.ybegin = this.height - this.bottomOffset
+        console.log(this.topOffset, this.bottomOffset, this.rightoffset, this.leftOffset)
     }
 
     protected initializeResizeObserver() {
@@ -81,7 +85,9 @@ abstract class Graph {
         this.drawXAxis()
         this.drawYAxis()
         this.drawHorizontalLines()
+        this.drawVerticalLines()
         this.writeTitle()
+        //this.drawBottomLabels()
         this.draw()
     }
 
@@ -99,7 +105,7 @@ abstract class Graph {
     }
 
     protected moveToCoordinateCenter() {
-        this.ctx.translate(1 / 10 * this.width, 9 / 10 * this.height)
+        this.ctx.translate(this.leftOffset, this.height - this.topOffset)
     }
 
     protected drawHorizontalLines() {
@@ -131,13 +137,24 @@ abstract class Graph {
         this.ctx.restore()
     }
 
+    private drawVerticalLines() {
+        let step: number = this.xlength / this.dataset.length
+        this.ctx.save()
+        this.ctx.fillStyle = "#a8a8a8"
+        for (let i = 0; i < this.dataset.length; i++) {
+            this.ctx.fillRect(i * step, this.xAxisCoor - this.topOffset, 1, -this.ylength)
+        }
+        this.ctx.restore()
+    }
+
+
     protected reverseScaleYAxis() {
         let minValue: number = findMinValue(this.dataset)
         let maxValue: number = findMaxValue(this.dataset)
 
         let xAxisPosition: number = calculateXAxisPosition(minValue, maxValue, this.ylength, this.topOffset)
         this.xAxisCoor = xAxisPosition
-        this.ctx.setTransform(1, 0, 0, 1, this.OFFSET_CONSTANT * this.width, xAxisPosition)
+        this.ctx.setTransform(1, 0, 0, 1, this.leftOffset, xAxisPosition)
         this.ctx.scale(1, -1)
     }
 
@@ -193,6 +210,14 @@ abstract class Graph {
 
     enableHorizontalLines(enabled: boolean) {
         this.horizontalLinesEnabled = enabled
+    }
+
+    enableVerticalLiens(enabled: boolean) {
+        this.verticalLinesEnabled = enabled
+    }
+
+    setLabels(labels: string[]) {
+        this.labels = labels
     }
 
     protected abstract draw()

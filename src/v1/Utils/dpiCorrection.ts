@@ -1,6 +1,5 @@
 function fix_dpi(canvas: HTMLCanvasElement) {
     let dpi = window.devicePixelRatio
-    console.log(canvas)
     let canvasElement = document.getElementById(canvas.id)
     let style: any = {
         height(): number {

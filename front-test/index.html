@@ -18,6 +18,16 @@
     </canvas>
 
 
-    <script type="module" src="../dist/out-tsc/main_test.js" ></script>
+    <script src="../dist-webpack/bundle.js" ></script>
+    <script type="module">
+        let canvas = document.getElementById('panel')
+        graphDrawing.fix_dpi(canvas)
+        
+        let bar = new graphDrawing.BarGraph(canvas)
+       
+        bar.setDataset([1, 2, 3, -10, 4, 5, -4])
+        bar.setLabels(['lbl1','lbl1','lbl1','lbl1','lbl1','lbl1','lbl1'])
+        bar.repaint()
+    </script>
 </body>
 </html>
