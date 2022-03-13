@@ -1,6 +1,6 @@
-import { Graph } from "./Graph"
-import { Bar } from "../Interfaces/Bar"
-import { determineFontSize } from "../Utils/letterHeight"
+import { Graph } from "./Graph.js"
+import { Bar } from "../Interfaces/Bar.js"
+import { determineFontSize } from "../Utils/letterHeight.js"
 
 class BarGraph extends Graph {
     protected loaded: number = 0.1
@@ -21,7 +21,6 @@ class BarGraph extends Graph {
         this.datasetBars = []
         let step: number = this.xlength / this.dataset.length
         let offset = step * this.barOffsetCof
-        console.log(offset)
         let barWidth: number = step - 2 * offset
         this.ctx.fillStyle = this.dataColor
         let scaledValues = this.scaleYvalue()
@@ -58,47 +57,37 @@ class BarGraph extends Graph {
         for (let i = 0; i < this.labels.length; i++)
             this.drawLabelAtPosition(this.labels[i], i, step)
     }
-    /*
-    
-    
-        IN PROGRESS.....
-    
-    */
+
     private drawLabelAtPosition(label: string, i: number, step: number) {
         this.ctx.save()
         this.ctx.setTransform(1, 0, 0, 1, 0, 0)
         this.ctx.translate(this.leftOffset, this.ylength + this.topOffset)
-        this.ctx.fillStyle = "black"
+        this.ctx.fillStyle = this.labelsColor
 
         let textHeight = determineFontSize(this.height)
         this.ctx.font = `bold ${Math.floor(textHeight)}px Arial`
         let textWidth: number = this.ctx.measureText(label).width
-
+        console.log(textWidth, step - 20)
         if (textWidth > step - 20)
             this.drawCurvedLabel(label, textWidth, textHeight, i, step)
         else
-            this.ctx.fillText(label, i * step + 10 + ((step - 20) - textWidth) / 2, this.bottomOffset / 2, step - 20)
+            this.ctx.fillText(label, i * step + 10 + (Math.abs(step - 20) - textWidth) / 2, this.bottomOffset / 2, Math.abs(step - 20))
 
         this.ctx.restore()
     }
 
     private drawCurvedLabel(label: string, textWidth: number, textHeight: number, i: number, step: number) {
-        let toLeft = 25
+        let toLeft = 26
         let x = 10 + step / 2 + toLeft
-        let upperOffset: number = Math.sqrt(Math.pow(textWidth, 2) - Math.pow(x, 2))
+        let upperOffset: number = Math.sqrt(Math.abs(Math.pow(textWidth, 2) - Math.pow(x, 2)))
         let angle: number = Math.asin(upperOffset / textWidth)
-
         this.ctx.save()
         this.ctx.translate(i * step - toLeft, upperOffset + textHeight)
         this.ctx.rotate(-angle)
         this.ctx.fillText(label, 0, 0)
         this.ctx.restore()
     }
-    /*
-    *******
-    *******
-    *******
-    */
+
 
 }
 

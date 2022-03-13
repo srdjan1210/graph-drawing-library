@@ -1,13 +1,14 @@
-import { findMinValue, findMaxValue } from "../Utils/minMax"
-import { calculateXAxisPosition } from "../Utils/axisCalculation"
-import { fix_dpi } from "../Utils/dpiCorrection"
+import { findMinValue, findMaxValue } from "../Utils/minMax.js"
+import { calculateXAxisPosition } from "../Utils/axisCalculation.js"
+import { fix_dpi } from "../Utils/dpiCorrection.js"
+import { determineFontSize } from "../Utils/letterHeight.js"
 
 abstract class Graph {
     protected canvas: HTMLCanvasElement
     protected ctx: CanvasRenderingContext2D
     protected width: number
     protected height: number
-    protected shouldAnimate: boolean = true
+    protected shouldAnimate: boolean = false
     protected leftOffset: number = 10
     protected bottomOffset: number = 10
     protected topOffset: number = 30
@@ -22,6 +23,8 @@ abstract class Graph {
     protected titleVisibility: boolean = true
     protected resizedNumber: number = 0
     protected dataColor: string = "blue"
+    protected labelsColor: string = "gray"
+    protected titleColor: string = "#6e6e6e"
     protected horizontalLinesEnabled: boolean = true
     protected verticalLinesEnabled: boolean = true
     protected labels: string[] = []
@@ -51,7 +54,6 @@ abstract class Graph {
         this.ylength = this.height - this.bottomOffset - this.topOffset
         this.xbegin = this.leftOffset
         this.ybegin = this.height - this.bottomOffset
-        console.log(this.topOffset, this.bottomOffset, this.rightoffset, this.leftOffset)
     }
 
     protected initializeResizeObserver() {
@@ -87,7 +89,7 @@ abstract class Graph {
         this.drawHorizontalLines()
         this.drawVerticalLines()
         this.writeTitle()
-        //this.drawBottomLabels()
+        this.writeSideValues()
         this.draw()
     }
 
@@ -115,29 +117,21 @@ abstract class Graph {
         let linesAboveZero: number = Math.floor(xAxisPositionCoef * this.HORIZONTAL_LINES_COUNT)
         let linesBelowZero: number = this.HORIZONTAL_LINES_COUNT - linesAboveZero
 
-        this.drawHorizontalLinesAboveZero(linesAboveZero, this.xAxisCoor - this.topOffset)
-        this.drawHorizontalLinesBelowZero(linesBelowZero, this.ylength + this.topOffset - this.xAxisCoor)
+        this.drawHorizontalLinesInDirection(linesAboveZero, this.xAxisCoor - this.topOffset, 1)
+        this.drawHorizontalLinesInDirection(linesBelowZero, this.ylength + this.topOffset - this.xAxisCoor, -1)
     }
 
-    private drawHorizontalLinesAboveZero(count: number, yLenAboveZero: number) {
-        let step = yLenAboveZero / count
+    private drawHorizontalLinesInDirection(count: number, yLen, direction: number) {
+        let step = yLen / count
         this.ctx.save()
         this.ctx.fillStyle = "darkgray"
-        for (let y = step; y <= yLenAboveZero; y += step)
-            this.ctx.fillRect(0, y, this.xlength, 1)
-        this.ctx.restore()
-    }
-
-    private drawHorizontalLinesBelowZero(count: number, yLenBelowZero: number) {
-        let step = yLenBelowZero / count
-        this.ctx.save()
-        this.ctx.fillStyle = "darkgray"
-        for (let y = step; y <= yLenBelowZero; y += step)
-            this.ctx.fillRect(0, -y, this.xlength, 1)
+        for (let y = step; y <= yLen; y += step)
+            this.ctx.fillRect(0, direction * y, this.xlength, 1)
         this.ctx.restore()
     }
 
     private drawVerticalLines() {
+        if (!this.verticalLinesEnabled) return
         let step: number = this.xlength / this.dataset.length
         this.ctx.save()
         this.ctx.fillStyle = "#a8a8a8"
@@ -178,15 +172,70 @@ abstract class Graph {
 
         let titlePosition = this.width / 2 - 10
         this.ctx.save()
-        //let fontSize = 0.4 * this.topOffset
-        this.ctx.fillStyle = "#6e6e6e"
-        // this.ctx.font = `bold ${fontSize * window.devicePixelRatio}px Arial`
+        this.ctx.fillStyle = this.titleColor
         this.ctx.font = `bold 15px Arial`
         this.ctx.setTransform(1, 0, 0, 1, 0, 0)
         this.ctx.scale(1, 1)
         this.ctx.fillText(this.title, titlePosition + 0.5, this.topOffset / 2 + 0.5)
         this.ctx.restore()
     }
+
+    protected writeSideValues() {
+        this.ctx.save()
+        this.ctx.setTransform(1, 0, 0, 1, this.leftOffset, this.xAxisCoor)
+
+        let xAxisPositionCoef: number = (this.xAxisCoor - this.topOffset) / this.ylength
+        let minValue: number = findMinValue(this.dataset)
+        let maxValue: number = findMaxValue(this.dataset)
+
+        this.determineTextSizeAndWrite(0, 0)
+        this.writeSideValuesAboveZero(xAxisPositionCoef, maxValue)
+        this.writeSideValueBelowZero(xAxisPositionCoef, minValue)
+
+        this.ctx.restore()
+    }
+
+    private writeSideValuesAboveZero(xAxisPositionCoef: number, maxValue: number) {
+        let linesAboveZero: number = Math.floor(xAxisPositionCoef * this.HORIZONTAL_LINES_COUNT)
+        if (linesAboveZero == 0) return;
+
+        let realStep: number = (this.xAxisCoor - this.topOffset) / linesAboveZero
+        let valueStep: number = maxValue / linesAboveZero
+        let valueForWriting: number = valueStep
+
+        for (let y = realStep; y <= (this.xAxisCoor - this.topOffset); y += realStep) {
+            this.determineTextSizeAndWrite(valueForWriting, -y)
+            valueForWriting += valueStep
+        }
+    }
+
+    private writeSideValueBelowZero(xAxisPositionCoef: number, minValue: number) {
+        let linesBelowZero: number = this.HORIZONTAL_LINES_COUNT - Math.floor(xAxisPositionCoef * this.HORIZONTAL_LINES_COUNT)
+        if (linesBelowZero == 0) return;
+
+        let realStep: number = (this.ylength - this.xAxisCoor + this.topOffset) / linesBelowZero
+        let valueStep: number = minValue / linesBelowZero
+        let valueForWriting: number = valueStep
+
+        for (let y = realStep; y <= (this.ylength - this.xAxisCoor + this.topOffset); y += realStep) {
+            this.determineTextSizeAndWrite(valueForWriting, y)
+            valueForWriting += valueStep
+        }
+    }
+
+    private determineTextSizeAndWrite(value: number, y: number) {
+        let text: string = value.toFixed(2)
+        this.ctx.save()
+        let textHeight: number = determineFontSize(this.height)
+        this.ctx.fillStyle = this.labelsColor
+        this.ctx.font = `bold ${textHeight}px Arial`
+
+        let textWidth: number = this.ctx.measureText(text).width
+
+        this.ctx.fillText(text, -10 - textWidth, y + textHeight * 0.4)
+        this.ctx.restore()
+    }
+
 
     setDataset(dataset: number[]) {
         this.dataset = dataset
@@ -202,6 +251,14 @@ abstract class Graph {
 
     setTitleVisible(visibility: boolean) {
         this.titleVisibility = visibility
+    }
+
+    setTitleColor(color: string) {
+        this.titleColor = color
+    }
+
+    setLabelsColor(color: string) {
+        this.labelsColor = color
     }
 
     setDataColor(color: string) {

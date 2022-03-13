@@ -1,0 +1,296 @@
+body{
+    margin: 0;
+    padding: 0;
+}
+
+.graph-page-container{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: #fafafa;
+    font-family: 'Mukta', sans-serif;
+    font-family: 'Roboto', sans-serif;
+}
+
+.back-to-newsfeed-wrapper{
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    align-items: center;
+    padding: 15px;
+    font-size: 30px;
+    color: #686662;
+}
+
+.back-to-newsfeed-wrapper:hover{
+    cursor: pointer;
+    transform: scale(1.01);
+    transition: all 0.1s;
+    color: black;
+}
+
+.back-to-newsfeed-label{
+    padding-left: 10px;
+    font-size: 20px;
+}
+
+
+
+.graph-page-title{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 50px 0;
+    user-select: none;
+    margin-top: 20px;
+}
+
+.logo-wrapper{
+    width: 30%;
+    height: 100%;
+    max-width: 800px;
+}
+
+.graph-page-logo{
+    height: 100%;
+    width: 100%;
+}
+
+.graph-page-search{
+    display: flex;
+    align-self: center;
+    margin-top: 30px;
+    width: 40%;
+    height: 70px;
+    border: 1px solid rgb(145, 143, 142);
+    border-radius: 15px;
+    padding: 0 10px;
+    cursor: pointer;
+    margin-bottom: 30px;
+    background-color: #fff;
+    color: #2e2d2b;
+}
+
+.search-icon{
+    height: 100%;
+    font-size: 40px;
+}
+
+.graph-page-input{
+    width: 100%;
+    border-radius: 15px;
+    font-size: 30px;
+    outline: none;
+    border: 0;
+}
+
+.graph-company{
+    display: flex;
+    justify-content: center;
+    height: 100px;
+    padding: 70px 0;
+}
+
+.graph-page-company-name{
+    display: flex;
+    justify-content: center;
+    margin-left: 10px;
+    font-size: 50px;
+    user-select: none;
+    color: darkslategrey;
+}
+
+/*INFO*/
+
+.grid-info-wrapper{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 0 15%;
+    color: #1f1e1d;
+}
+
+.graph-page-company-info{
+    display: flex;
+    flex-direction: column;
+    padding: 0 30px;
+}
+
+
+.info-title{
+    display: flex;
+    justify-content: center;
+    font-size: 25px;
+    font-weight: 40px;
+}
+
+.grid-cell-info{
+    padding: 30px 0;
+}
+
+.info-row{
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 18px;
+}
+
+
+
+/*BUTTONS ANG GRAPHS*/
+
+.quarterly-and-annually-btn-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    height: 60px;
+    font-size: 22px;
+    gap: 30px;
+    margin: 30px 0;
+    color: grey;
+    text-align: center;
+}
+
+.quarterly-btn, .annually-btn{
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    transition: background-color 200ms ease-in;
+    user-select: none;
+}
+
+.quarterly-btn-start{
+    background-color: #709db8;
+    color: #fff;
+}
+
+.quarterly-btn-clicked, .annually-btn-clicked{
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    background-color: #709db8;
+    color: #fff;
+    transition: background-color 200ms ease-in;
+}
+
+.quarterly-btn:hover, .annually-btn:hover{
+    background-color: lightgrey;
+    color: #fff;
+    cursor: pointer;
+}
+
+.chart-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 50px;
+    padding: 20px 50px;
+}
+
+.chart-panel{
+    height: 400px;
+    width: 1600/3px;
+}
+
+.chart-wrapper{
+    width: 100%;
+    padding-bottom: 75%;
+    z-index: 1;
+}
+
+canvas{
+    width: 100%;
+    height: 100%;
+}
+
+.chart-panel-header {
+    position: relative;
+    z-index: 100;
+    top: 30px;
+    margin-top: 3px;
+    color: grey;
+    cursor: pointer;
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 10px;
+}
+
+.exp-shrink-icon {
+    font-size: 25px;
+    opacity: 0.5;
+}
+
+.exp-shrink-icon:hover{
+    color: #2e2d2b;
+    
+}
+
+.close-expand-icon{
+    display: none;
+
+}
+
+.chart-expanded{
+    position: fixed;
+    z-index: 10000;
+    width: 70vw;
+    max-height: 90vh;
+    height: 83vh;
+    top: 5vh;
+    left: 15vw;
+    padding: 0px;
+    animation: expand 1s ease ;
+}
+
+
+.gray-panel{
+    position: fixed;
+    z-index: 5000;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    opacity: 0.4;
+    top: 0;
+    left: 0;
+    display: none;
+}
+
+@keyframes expand {
+    from{ transform: scale(0.2);}
+    to{ transform: scale(1.0);}
+}
+
+@media screen and (max-width: 1440px){
+    .chart-grid{
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 50px;
+        padding: 20px 50px;
+    }
+  
+    .grid-info-wrapper{
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .logo-wrapper{
+        width: 50%;
+    }
+}
+
+@media screen and (max-width: 1024px){
+    .chart-grid{
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: 50px;
+        padding: 20px 50px;
+    }
+
+    .grid-info-wrapper{
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    .logo-wrapper{
+        width: 50%;
+    }
+   
+}
+
